@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Meme</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0f0f0f;
+            --surface: #1a1a1a;
+            --surface-2: #2a2a2a;
+            --text: #f0f0f0;
+            --text-dim: #888;
+            --accent: #ff6b35;
+            --accent-hover: #ff8555;
+            --correct: #22c55e;
+            --incorrect: #ef4444;
+            --border: #333;
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        header h1 span {
+            color: var(--accent);
+        }
+
+        .score-bar {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 8px;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+        }
+
+        .score-bar strong {
+            color: var(--text);
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .media-area {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .media-area img,
+        .media-area video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            display: none;
+        }
+
+        .feedback.correct {
+            display: block;
+            color: var(--correct);
+            background: rgba(34, 197, 94, 0.08);
+        }
+
+        .feedback.incorrect {
+            display: block;
+            color: var(--incorrect);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .search-section {
+            padding: 16px;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-wrapper input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+        }
+
+        .search-wrapper input::placeholder {
+            color: #666;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .suggestions.visible {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.1s;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.active {
+            background: var(--surface);
+        }
+
+        .suggestion-item .match {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            padding: 0 16px 16px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+            color: white;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.05s;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.secondary {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+
+        button.secondary:hover {
+            background: var(--surface);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            text-align: center;
+            padding: 24px 16px;
+            color: var(--text-dim);
+        }
+
+        .status.error {
+            color: var(--incorrect);
+        }
+
+        .status h2 {
+            color: var(--text);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .retry-btn {
+            margin-top: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .retry-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .hint {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            padding: 8px 16px 16px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            header h1 {
+                font-size: 1.6rem;
+            }
+
+            .score-bar {
+                gap: 16px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tebak <span>Meme</span></h1>
+            <div class="score-bar">
+                <div>Score: <strong id="score">0</strong></div>
+                <div>Streak: <strong id="streak">0</strong></div>
+            </div>
+        </header>
+
+        <div class="card" id="game-card">
+            <div class="media-area" id="media-area">
+                <div class="status" id="status">Loading memes...</div>
+            </div>
+            <div class="feedback" id="feedback"></div>
+            <div class="search-section">
+                <div class="search-wrapper">
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Tebak sound ini..."
+                        autocomplete="off"
+                        disabled
+                    />
+                    <div class="suggestions" id="suggestions"></div>
+                </div>
+                <div class="hint" id="hint">Select from suggestions or type and press Enter</div>
+            </div>
+            <div class="actions">
+                <button id="submit-btn" disabled>Submit</button>
+                <button id="next-btn" class="secondary hidden">Next Meme</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        // Change these values to your GitHub repository.
+        const CONFIG = {
+            githubOwner: "USERNAME",
+            githubRepo: "REPOSITORY",
+            memesPath: "memes",
+            branch: "main"
+        };
+        // =======================================================
+
+        const state = {
+            memes: [],
+            searchIndex: [],
+            currentMeme: null,
+            score: 0,
+            streak: 0,
+            answered: false,
+            selectedIndex: -1,
+            suggestions: [],
+            lastMemeIndex: -1
+        };
+
+        const els = {
+            mediaArea: document.getElementById("media-area"),
+            status: document.getElementById("status"),
+            feedback: document.getElementById("feedback"),
+            searchInput: document.getElementById("search-input"),
+            suggestions: document.getElementById("suggestions"),
+            submitBtn: document.getElementById("submit-btn"),
+            nextBtn: document.getElementById("next-btn"),
+            score: document.getElementById("score"),
+            streak: document.getElementById("streak"),
+            hint: document.getElementById("hint"),
+            gameCard: document.getElementById("game-card")
+        };
+
+        function githubApiUrl() {
+            return `https://api.github.com/repos/${CONFIG.githubOwner}/${CONFIG.githubRepo}/contents/${CONFIG.memesPath}?ref=${CONFIG.branch}`;
+        }
+
+        function assetUrl(path) {
+            return `https://raw.githubusercontent.com/${CONFIG.githubOwner}/${CONFIG.githubRepo}/${CONFIG.branch}/${CONFIG.memesPath}/${encodeURIComponent(path)}`;
+        }
+
+        async function loadMemes() {
+            setStatus("Loading memes...", false);
+            els.searchInput.disabled = true;
+            els.submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(githubApiUrl());
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (!Array.isArray(data)) {
+                    throw new Error("Invalid API response");
+                }
+
+                const pairs = pairAssets(data);
+                if (pairs.length === 0) {
+                    setStatus(
+                        `<h2>No memes found.</h2>Upload matching .jpg/.png and .mp4 files<br>to the memes folder.`,
+                        true
+                    );
+                    return;
+                }
+
+                pairs.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
+                state.memes = pairs;
+                state.searchIndex = pairs.map(m => m.title);
+
+                setStatus("", false);
+                els.mediaArea.innerHTML = "";
+                els.searchInput.disabled = false;
+                els.submitBtn.disabled = false;
+                els.searchInput.focus();
+
+                startRound();
+            } catch (err) {
+                console.error(err);
+                setStatus(
+                    `<h2>Failed to load memes.</h2>Please check:<br>- GitHub repository<br>- Repository name<br>- Branch<br>- Memes folder<br>- Internet connection`,
+                    true
+                );
+                els.status.innerHTML += `<br><button class="retry-btn" onclick="loadMemes()">Retry</button>`;
+            }
+        }
+
+        function pairAssets(files) {
+            const map = new Map();
+            const imageExts = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+            const videoExts = new Set([".mp4", ".webm"]);
+
+            for (const file of files) {
+                if (file.type === "file" && file.name) {
+                    const lower = file.name.toLowerCase();
+                    let ext = "";
+                    for (const e of imageExts) {
+                        if (lower.endsWith(e)) { ext = e; break; }
+                    }
+                    if (!ext) {
+                        for (const e of videoExts) {
+                            if (lower.endsWith(e)) { ext = e; break; }
+                        }
+                    }
+                    if (!ext) continue;
+
+                    const baseName = file.name.slice(0, -ext.length);
+                    if (!map.has(baseName)) {
+                        map.set(baseName, {});
+                    }
+                    const entry = map.get(baseName);
+                    if (imageExts.has(ext)) {
+                        entry.image = { name: file.name, url: assetUrl(file.name) };
+                    } else if (videoExts.has(ext)) {
+                        entry.video = { name: file.name, url: assetUrl(file.name) };
+                    }
+                }
+            }
+
+            const result = [];
+            for (const [title, { image, video }] of map.entries()) {
+                if (image && video) {
+                    result.push({ title, image, video });
+                }
+            }
+            return result;
+        }
+
+        function setStatus(html, isError) {
+            els.status.innerHTML = html;
+            els.status.className = "status" + (isError ? " error" : "");
+            if (html) {
+                els.status.style.display = "block";
+            } else {
+                els.status.style.display = "none";
+            }
+        }
+
+        function startRound() {
+            state.answered = false;
+            state.selectedIndex = -1;
+            state.suggestions = [];
+            els.searchInput.value = "";
+            els.feedback.className = "feedback";
+            els.feedback.textContent = "";
+            els.submitBtn.classList.remove("hidden");
+            els.submitBtn.disabled = true;
+            els.nextBtn.classList.add("hidden");
+            els.suggestions.classList.remove("visible");
+            els.hint.style.display = "block";
+
+            if (state.memes.length === 0) return;
+
+            let idx;
+            if (state.memes.length === 1) {
+                idx = 0;
+            } else {
+                do {
+                    idx = Math.floor(Math.random() * state.memes.length);
+                } while (idx === state.lastMemeIndex);
+            }
+            state.lastMemeIndex = idx;
+            state.currentMeme = state.memes[idx];
+
+            els.mediaArea.innerHTML = `<img src="${state.currentMeme.image.url}" alt="${escapeHtml(state.currentMeme.title)}" />`;
+            els.searchInput.disabled = false;
+            els.searchInput.focus();
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function fuzzyMatch(query, text) {
+            const q = query.toLowerCase();
+            const t = text.toLowerCase();
+
+            if (t.includes(q)) return { score: 100, type: "substring" };
+
+            const qWords = q.split(/\s+/).filter(Boolean);
+            const tWords = t.split(/\s+/);
+
+            const allWordsMatch = qWords.every(qw => tWords.some(tw => tw.startsWith(qw)));
+            if (allWordsMatch) return { score: 80, type: "word" };
+
+            const prefixMatch = tWords.some(tw => tw.startsWith(q));
+            if (prefixMatch) return { score: 60, type: "prefix" };
+
+            let qi = 0;
+            for (let i = 0; i < t.length && qi < q.length; i++) {
+                if (t[i] === q[qi]) qi++;
+            }
+            if (qi === q.length) return { score: 40, type: "fuzzy" };
+
+            return null;
+        }
+
+        function searchMemes(query) {
+            const q = query.trim();
+            if (!q) return [];
+
+            const results = state.searchIndex
+                .map(title => {
+                    const m = fuzzyMatch(q, title);
+                    if (!m) return null;
+                    return { title, ...m };
+                })
+                .filter(Boolean)
+                .sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+                })
+                .slice(0, 8);
+
+            return results;
+        }
+
+        function highlightMatch(title, query) {
+            const q = query.trim().toLowerCase();
+            if (!q) return escapeHtml(title);
+
+            const escaped = escapeHtml(title);
+            const regex = new RegExp(`(${escapeRegex(q)})`, "gi");
+            return escaped.replace(regex, '<span class="match">$1</span>');
+        }
+
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        }
+
+        function showSuggestions(query) {
+            const results = searchMemes(query);
+            state.suggestions = results.map(r => r.title);
+            state.selectedIndex = results.length > 0 ? 0 : -1;
+
+            if (results.length === 0) {
+                els.suggestions.classList.remove("visible");
+                els.suggestions.innerHTML = "";
+                els.submitBtn.disabled = true;
+                return;
+            }
+
+            els.suggestions.innerHTML = results
+                .map((r, i) => {
+                    const hl = highlightMatch(r.title, query);
+                    return `<div class="suggestion-item" data-index="${i}" data-title="${escapeHtml(r.title)}">${hl}</div>`;
+                })
+                .join("");
+            els.suggestions.classList.add("visible");
+            updateSuggestionHighlight();
+            els.submitBtn.disabled = false;
+        }
+
+        function updateSuggestionHighlight() {
+            const items = els.suggestions.querySelectorAll(".suggestion-item");
+            items.forEach((item, i) => {
+                item.classList.toggle("active", i === state.selectedIndex);
+            });
+        }
+
+        function selectSuggestion(title) {
+            els.searchInput.value = title;
+            state.selectedIndex = state.suggestions.indexOf(title);
+            els.suggestions.classList.remove("visible");
+            els.submitBtn.disabled = false;
+        }
+
+        function submitAnswer() {
+            if (state.answered || !state.currentMeme) return;
+
+            const answer = els.searchInput.value.trim();
+            if (!answer) return;
+
+            if (answer.toLowerCase() === state.currentMeme.title.toLowerCase()) {
+                handleCorrect();
+            } else {
+                handleIncorrect();
+            }
+        }
+
+        function handleCorrect() {
+            state.answered = true;
+            state.score += 1;
+            state.streak += 1;
+            updateScoreUI();
+
+            els.feedback.className = "feedback correct";
+            els.feedback.textContent = "CORRECT";
+            els.submitBtn.classList.add("hidden");
+            els.nextBtn.classList.remove("hidden");
+            els.hint.style.display = "none";
+
+            els.mediaArea.innerHTML = `<video src="${state.currentMeme.video.url}" controls autoplay style="width:100%;height:100%;object-fit:contain;"></video>`;
+        }
+
+        function handleIncorrect() {
+            state.streak = 0;
+            updateScoreUI();
+
+            els.feedback.className = "feedback incorrect";
+            els.feedback.textContent = "INCORRECT";
+
+            els.mediaArea.innerHTML = `<img src="${state.currentMeme.image.url}" alt="${escapeHtml(state.currentMeme.title)}" />`;
+            els.searchInput.value = "";
+            els.searchInput.focus();
+            els.submitBtn.disabled = true;
+            els.suggestions.classList.remove("visible");
+            state.selectedIndex = -1;
+        }
+
+        function updateScoreUI() {
+            els.score.textContent = state.score;
+            els.streak.textContent = state.streak;
+        }
+
+        els.searchInput.addEventListener("input", (e) => {
+            if (state.answered) return;
+            const val = e.target.value.trim();
+            els.submitBtn.disabled = val.length === 0;
+            showSuggestions(val);
+        });
+
+        els.searchInput.addEventListener("focus", () => {
+            if (!state.answered && els.searchInput.value.trim()) {
+                showSuggestions(els.searchInput.value.trim());
+            }
+        });
+
+        els.searchInput.addEventListener("keydown", (e) => {
+            const items = els.suggestions.querySelectorAll(".suggestion-item");
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                if (!els.suggestions.classList.contains("visible")) {
+                    showSuggestions(els.searchInput.value.trim());
+                    return;
+                }
+                if (state.selectedIndex < state.suggestions.length - 1) {
+                    state.selectedIndex++;
+                    updateSuggestionHighlight();
+                }
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                if (state.selectedIndex > 0) {
+                    state.selectedIndex--;
+                    updateSuggestionHighlight();
+                }
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (state.selectedIndex >= 0 && state.suggestions[state.selectedIndex]) {
+                    selectSuggestion(state.suggestions[state.selectedIndex]);
+                    submitAnswer();
+                } else if (els.searchInput.value.trim()) {
+                    submitAnswer();
+                }
+            } else if (e.key === "Escape") {
+                els.suggestions.classList.remove("visible");
+            }
+        });
+
+        els.suggestions.addEventListener("click", (e) => {
+            const item = e.target.closest(".suggestion-item");
+            if (!item) return;
+            const title = item.getAttribute("data-title");
+            selectSuggestion(title);
+            submitAnswer();
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest(".search-wrapper")) {
+                els.suggestions.classList.remove("visible");
+            }
+        });
+
+        els.submitBtn.addEventListener("click", submitAnswer);
+        els.nextBtn.addEventListener("click", startRound);
+
+        loadMemes();
+    </script>
+</body>
+</html>
