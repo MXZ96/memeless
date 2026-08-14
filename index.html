@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tebak Meme</title>
+    <title>Tebak Meme 🧠</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700;900&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,94 +13,264 @@
         }
 
         :root {
-            --bg: #0f0f0f;
-            --surface: #1a1a1a;
-            --surface-2: #2a2a2a;
-            --text: #f0f0f0;
-            --text-dim: #888;
-            --accent: #ff6b35;
-            --accent-hover: #ff8555;
-            --correct: #22c55e;
-            --incorrect: #ef4444;
-            --border: #333;
-            --radius: 16px;
-            --radius-sm: 10px;
+            --bg-1: #667eea;
+            --bg-2: #764ba2;
+            --surface: rgba(255, 255, 255, 0.95);
+            --surface-glass: rgba(255, 255, 255, 0.75);
+            --surface-dark: rgba(20, 20, 30, 0.85);
+            --text: #1a1a2e;
+            --text-light: #fff;
+            --text-dim: #666;
+            --accent: #ff6b6b;
+            --accent-2: #feca57;
+            --accent-3: #48dbfb;
+            --correct: #1dd1a1;
+            --incorrect: #ff6b6b;
+            --border: rgba(255, 255, 255, 0.3);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            --radius: 24px;
+            --radius-sm: 16px;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-shapes {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.5;
+            animation: floatShape 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: #feca57;
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: #ff6b6b;
+            bottom: -150px;
+            right: -150px;
+            animation-delay: -7s;
+        }
+
+        .shape:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            background: #48dbfb;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -14s;
+        }
+
+        .shape:nth-child(4) {
+            width: 200px;
+            height: 200px;
+            background: #1dd1a1;
+            top: 20%;
+            right: 10%;
+            animation-delay: -3s;
+        }
+
+        .shape:nth-child(5) {
+            width: 180px;
+            height: 180px;
+            background: #ff9ff3;
+            bottom: 20%;
+            left: 10%;
+            animation-delay: -10s;
+        }
+
+        @keyframes floatShape {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 10px) scale(1.05); }
         }
 
         .container {
             width: 100%;
-            max-width: 640px;
-            margin: 0 auto;
+            max-width: 600px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-wrapper {
+            background: var(--surface-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .game-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #1dd1a1, #ff9ff3);
+            background-size: 200% 100%;
+            animation: gradientShift 3s linear infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
         }
 
         header {
             text-align: center;
-            margin-bottom: 24px;
+            padding: 28px 24px 16px;
+            position: relative;
+        }
+
+        .mascot {
+            font-size: 3.5rem;
+            animation: bounce 2s infinite;
+            display: inline-block;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
 
         header h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -1px;
+            line-height: 1.1;
         }
 
         header h1 span {
-            color: var(--accent);
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .score-bar {
+        .stats-row {
             display: flex;
             justify-content: center;
-            gap: 24px;
-            margin-top: 8px;
-            font-size: 0.95rem;
-            color: var(--text-dim);
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
         }
 
-        .score-bar strong {
+        .stat-badge {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
             color: var(--text);
-        }
-
-        .attempt-bar {
             display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-top: 6px;
-            font-size: 0.9rem;
-            color: var(--text-dim);
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .attempt-bar strong {
-            color: var(--accent);
+        .stat-badge.pulse {
+            animation: pulseBadge 0.4s ease;
         }
 
-        .card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
+        @keyframes pulseBadge {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .stat-badge .icon {
+            font-size: 1.2rem;
+        }
+
+        .stat-badge strong {
+            color: var(--bg-1);
+            font-size: 1.1rem;
+            min-width: 24px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .progress-bar-wrapper {
+            margin: 0 24px 16px;
+            height: 10px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 10px;
             overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #1dd1a1, #48dbfb);
+            border-radius: 10px;
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .media-area {
             width: 100%;
             aspect-ratio: 16 / 9;
-            background: #111;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
+            margin: 0 16px;
+            border-radius: var(--radius-sm);
         }
 
         .media-area img,
@@ -108,30 +279,65 @@
             height: 100%;
             object-fit: contain;
             display: block;
+            animation: fadeInMedia 0.4s ease;
         }
 
-        .feedback {
+        @keyframes fadeInMedia {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .media-area.shake {
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+        }
+
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .spinner-emoji {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .status {
             text-align: center;
-            padding: 12px 16px;
+            padding: 20px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .status.error {
+            color: #e74c3c;
+        }
+
+        .status h2 {
+            color: var(--text);
+            margin-bottom: 8px;
+            font-size: 1.2rem;
             font-weight: 700;
-            font-size: 1rem;
-            display: none;
-        }
-
-        .feedback.correct {
-            display: block;
-            color: var(--correct);
-            background: rgba(34, 197, 94, 0.08);
-        }
-
-        .feedback.incorrect {
-            display: block;
-            color: var(--incorrect);
-            background: rgba(239, 68, 68, 0.08);
         }
 
         .search-section {
-            padding: 16px;
+            padding: 20px;
         }
 
         .search-wrapper {
@@ -140,37 +346,62 @@
 
         .search-wrapper input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 16px 20px 16px 50px;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            background: var(--surface-2);
+            border: 3px solid transparent;
+            background: #fff;
             color: var(--text);
-            font-size: 1rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            font-family: inherit;
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .search-wrapper input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+            border-color: var(--bg-1);
+            box-shadow: 0 0 0 6px rgba(102, 126, 234, 0.15), 0 8px 25px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
 
         .search-wrapper input::placeholder {
-            color: #666;
+            color: #aaa;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.3rem;
+            pointer-events: none;
+            transition: transform 0.3s;
+        }
+
+        .search-wrapper input:focus ~ .search-icon {
+            transform: translateY(-50%) scale(1.2);
         }
 
         .suggestions {
             position: absolute;
-            top: calc(100% + 6px);
+            top: calc(100% + 8px);
             left: 0;
             right: 0;
-            background: var(--surface-2);
-            border: 1px solid var(--border);
+            background: #fff;
+            border: 3px solid var(--border);
             border-radius: var(--radius-sm);
-            max-height: 240px;
+            max-height: 260px;
             overflow-y: auto;
             z-index: 100;
             display: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .suggestions.visible {
@@ -178,140 +409,267 @@
         }
 
         .suggestion-item {
-            padding: 12px 16px;
+            padding: 14px 20px;
             cursor: pointer;
             font-size: 0.95rem;
-            transition: background 0.1s;
+            font-weight: 600;
+            transition: all 0.15s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
         }
 
         .suggestion-item:hover,
         .suggestion-item.active {
-            background: var(--surface);
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            color: var(--bg-1);
         }
 
         .suggestion-item .match {
-            color: var(--accent);
-            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
         }
 
         .actions {
             display: flex;
             gap: 10px;
-            padding: 0 16px 16px;
+            padding: 0 20px 20px;
         }
 
-        button {
+        .btn {
             flex: 1;
-            padding: 14px;
+            padding: 16px;
             border: none;
             border-radius: var(--radius-sm);
-            background: var(--accent);
-            color: white;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1rem;
             cursor: pointer;
-            transition: background 0.2s, transform 0.05s;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
         }
 
-        button:hover {
-            background: var(--accent-hover);
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        button:active {
-            transform: scale(0.98);
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
         }
 
-        button.secondary {
-            background: var(--surface-2);
-            border: 1px solid var(--border);
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(-1px);
         }
 
-        button.secondary:hover {
-            background: var(--surface);
+        .btn-secondary {
+            background: #fff;
+            color: var(--text);
+            border: 3px solid #eee;
         }
 
-        button:disabled {
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--bg-1);
+            color: var(--bg-1);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
-            transform: none;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
-        .status {
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn:active:not(:disabled)::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .feedback {
             text-align: center;
-            padding: 24px 16px;
-            color: var(--text-dim);
-        }
-
-        .status.error {
-            color: var(--incorrect);
-        }
-
-        .status h2 {
-            color: var(--text);
-            margin-bottom: 8px;
+            padding: 16px;
+            font-weight: 800;
             font-size: 1.1rem;
-        }
-
-        .retry-btn {
-            margin-top: 12px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px 20px;
+            display: none;
+            margin: 0 16px;
             border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-weight: 700;
+            animation: slideUp 0.3s ease;
         }
 
-        .retry-btn:hover {
-            background: var(--accent-hover);
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.correct {
+            display: block;
+            color: #fff;
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+            box-shadow: 0 4px 15px rgba(29, 209, 161, 0.4);
+        }
+
+        .feedback.incorrect {
+            display: block;
+            color: #fff;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
         }
 
         .hint {
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-dim);
-            padding: 8px 16px 16px;
+            padding: 4px 20px 0;
+            font-weight: 600;
+        }
+
+        .retry-btn {
+            margin-top: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
         }
 
         .hidden {
             display: none !important;
         }
 
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .combo-display {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .combo-display.show {
+            opacity: 1;
+            animation: comboBounce 0.5s ease;
+        }
+
+        @keyframes comboBounce {
+            0% { transform: translateX(-50%) scale(0.5); }
+            50% { transform: translateX(-50%) scale(1.3); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+
         @media (max-width: 480px) {
-            body {
-                padding: 12px;
-            }
-
-            header h1 {
-                font-size: 1.6rem;
-            }
-
-            .score-bar {
-                gap: 16px;
-                font-size: 0.85rem;
-            }
+            body { padding: 12px; }
+            header h1 { font-size: 1.7rem; }
+            .stats-row { gap: 8px; }
+            .stat-badge { padding: 6px 14px; font-size: 0.8rem; }
+            .actions { flex-direction: column; }
+            .btn { width: 100%; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Tebak <span>Meme</span></h1>
-            <div class="score-bar">
-                <div>Score: <strong id="score">0</strong></div>
-                <div>Streak: <strong id="streak">0</strong></div>
-            </div>
-            <div class="attempt-bar">
-                <div>Attempt: <strong id="attempt">1 of 5</strong></div>
-            </div>
-        </header>
+    <div class="bg-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
 
-        <div class="card" id="game-card">
+    <div class="combo-display" id="combo-display">🔥 COMBO x3!</div>
+    <div class="confetti-container" id="confetti-container"></div>
+
+    <div class="container">
+        <div class="game-wrapper">
+            <header>
+                <div class="mascot" id="mascot">🤔</div>
+                <h1>Tebak <span>Meme</span></h1>
+                <div class="stats-row">
+                    <div class="stat-badge">
+                        <span class="icon">⭐</span>
+                        Score: <strong id="score">0</strong>
+                    </div>
+                    <div class="stat-badge" id="streak-badge">
+                        <span class="icon">🔥</span>
+                        Streak: <strong id="streak">0</strong>
+                    </div>
+                </div>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" id="progress-bar" style="width: 100%;"></div>
+                </div>
+            </header>
+
             <div class="media-area" id="media-area">
-                <div class="status" id="status">Loading memes...</div>
+                <div class="loading-spinner">
+                    <div class="spinner-emoji">🎭</div>
+                    <div>Loading epic memes...</div>
+                </div>
             </div>
+
             <div class="feedback" id="feedback"></div>
+
             <div class="search-section">
                 <div class="search-wrapper">
                     <input
@@ -321,14 +679,16 @@
                         autocomplete="off"
                         disabled
                     />
+                    <span class="search-icon">🔍</span>
                     <div class="suggestions" id="suggestions"></div>
                 </div>
-                <div class="hint" id="hint">Select from suggestions or type and press Enter</div>
+                <div class="hint" id="hint">Ketik jawabanmu atau pilih dari daftar 😎</div>
             </div>
+
             <div class="actions">
-                <button id="submit-btn" disabled>Submit</button>
-                <button id="retry-btn" class="secondary hidden">Retry</button>
-                <button id="next-btn" class="secondary hidden">Next Meme</button>
+                <button id="submit-btn" disabled class="btn btn-primary">🚀 Submit</button>
+                <button id="retry-btn" class="btn btn-secondary hidden">🔄 Retry</button>
+                <button id="next-btn" class="btn btn-secondary hidden">⏭️ Next</button>
             </div>
         </div>
     </div>
@@ -367,9 +727,13 @@
             nextBtn: document.getElementById("next-btn"),
             score: document.getElementById("score"),
             streak: document.getElementById("streak"),
+            streakBadge: document.getElementById("streak-badge"),
             attempt: document.getElementById("attempt"),
             hint: document.getElementById("hint"),
-            gameCard: document.getElementById("game-card")
+            progressBar: document.getElementById("progress-bar"),
+            mascot: document.getElementById("mascot"),
+            comboDisplay: document.getElementById("combo-display"),
+            confettiContainer: document.getElementById("confetti-container")
         };
 
         function githubApiUrl() {
@@ -381,7 +745,12 @@
         }
 
         async function loadMemes() {
-            setStatus("Loading memes...", false);
+            els.mediaArea.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner-emoji">🎭</div>
+                    <div>Loading epic memes...</div>
+                </div>
+            `;
             els.searchInput.disabled = true;
             els.submitBtn.disabled = true;
 
@@ -396,10 +765,12 @@
 
                 const pairs = pairAssets(data);
                 if (pairs.length === 0) {
-                    setStatus(
-                        `<h2>No memes found.</h2>Upload matching .jpg/.png and .mp4 files<br>to the memes folder.`,
-                        true
-                    );
+                    els.mediaArea.innerHTML = `
+                        <div class="status error">
+                            <h2>😿 No memes found!</h2>
+                            Upload matching .jpg/.png and .mp4 files<br>to the memes folder.
+                        </div>
+                    `;
                     return;
                 }
 
@@ -407,7 +778,6 @@
                 state.memes = pairs;
                 state.searchIndex = pairs.map(m => m.title);
 
-                setStatus("", false);
                 els.mediaArea.innerHTML = "";
                 els.searchInput.disabled = false;
                 els.submitBtn.disabled = false;
@@ -416,11 +786,19 @@
                 startRound();
             } catch (err) {
                 console.error(err);
-                setStatus(
-                    `<h2>Failed to load memes.</h2>Please check:<br>- GitHub repository<br>- Repository name<br>- Branch<br>- Memes folder<br>- Internet connection`,
-                    true
-                );
-                els.status.innerHTML += `<br><button class="retry-btn" onclick="loadMemes()">Retry</button>`;
+                els.mediaArea.innerHTML = `
+                    <div class="status error">
+                        <h2>💥 Failed to load memes</h2>
+                        Please check:<br>
+                        - GitHub repository<br>
+                        - Repository name<br>
+                        - Branch<br>
+                        - Memes folder<br>
+                        - Internet connection
+                        <br>
+                        <button class="retry-btn" onclick="loadMemes()">🔄 Try Again</button>
+                    </div>
+                `;
             }
         }
 
@@ -465,16 +843,6 @@
             return result;
         }
 
-        function setStatus(html, isError) {
-            els.status.innerHTML = html;
-            els.status.className = "status" + (isError ? " error" : "");
-            if (html) {
-                els.status.style.display = "block";
-            } else {
-                els.status.style.display = "none";
-            }
-        }
-
         function startRound() {
             state.currentAttempt = 1;
             state.roundCompleted = false;
@@ -489,7 +857,8 @@
             els.nextBtn.classList.add("hidden");
             els.suggestions.classList.remove("visible");
             els.hint.style.display = "block";
-            updateAttemptUI();
+            updateProgressUI();
+            els.mascot.textContent = "🤔";
 
             if (state.memes.length === 0) return;
 
@@ -608,6 +977,11 @@
             els.suggestions.classList.remove("visible");
         }
 
+        function updateProgressUI() {
+            const pct = ((MAX_ATTEMPTS - state.currentAttempt + 1) / MAX_ATTEMPTS) * 100;
+            els.progressBar.style.width = pct + "%";
+        }
+
         function submitAnswer() {
             if (state.roundCompleted || !state.currentMeme) return;
 
@@ -628,14 +1002,21 @@
             state.streak += 1;
             updateScoreUI();
 
+            els.mascot.textContent = "😎";
             els.feedback.className = "feedback correct";
-            els.feedback.textContent = `CORRECT — You got it on attempt ${state.currentAttempt} of ${MAX_ATTEMPTS}. (+${scoreGained})`;
+            els.feedback.innerHTML = `🎉 BENAR! +${scoreGained} poin!<br><small>Mantap banget!</small>`;
             els.submitBtn.classList.add("hidden");
             els.retryBtn.classList.add("hidden");
             els.nextBtn.classList.remove("hidden");
             els.hint.style.display = "none";
             els.searchInput.disabled = true;
             els.suggestions.classList.remove("visible");
+            updateProgressUI();
+
+            if (state.streak >= 3) {
+                showCombo(state.streak);
+                spawnConfetti();
+            }
 
             els.mediaArea.innerHTML = `<video src="${state.currentMeme.video.url}" controls autoplay style="width:100%;height:100%;object-fit:contain;"></video>`;
         }
@@ -643,27 +1024,31 @@
         function handleIncorrect() {
             state.streak = 0;
             updateScoreUI();
+            els.mascot.textContent = "😵";
+            els.mediaArea.classList.add("shake");
+            setTimeout(() => els.mediaArea.classList.remove("shake"), 500);
 
             if (state.currentAttempt >= MAX_ATTEMPTS) {
                 state.roundCompleted = true;
                 els.feedback.className = "feedback incorrect";
-                els.feedback.innerHTML = `OUT OF ATTEMPTS<br><br>The correct answer was:<br><strong>"${escapeHtml(state.currentMeme.title)}"</strong>`;
+                els.feedback.innerHTML = `❌ Yah gagal...<br><small>Jawabannya: <strong>"${escapeHtml(state.currentMeme.title)}"</strong></small>`;
                 els.submitBtn.classList.add("hidden");
                 els.retryBtn.classList.remove("hidden");
                 els.nextBtn.classList.remove("hidden");
                 els.hint.style.display = "none";
                 els.searchInput.disabled = true;
                 els.suggestions.classList.remove("visible");
+                updateProgressUI();
 
                 els.mediaArea.innerHTML = `<video src="${state.currentMeme.video.url}" controls autoplay style="width:100%;height:100%;object-fit:contain;"></video>`;
                 return;
             }
 
             state.currentAttempt++;
-            updateAttemptUI();
+            updateProgressUI();
 
             els.feedback.className = "feedback incorrect";
-            els.feedback.textContent = "INCORRECT";
+            els.feedback.textContent = `❌ Salah! Coba lagi! (${state.currentAttempt}/${MAX_ATTEMPTS})`;
             els.mediaArea.innerHTML = `<img src="${state.currentMeme.image.url}" alt="${escapeHtml(state.currentMeme.title)}" />`;
             els.searchInput.value = "";
             els.searchInput.focus();
@@ -686,7 +1071,8 @@
             els.nextBtn.classList.add("hidden");
             els.suggestions.classList.remove("visible");
             els.hint.style.display = "block";
-            updateAttemptUI();
+            els.mascot.textContent = "🤔";
+            updateProgressUI();
 
             els.mediaArea.innerHTML = `<img src="${state.currentMeme.image.url}" alt="${escapeHtml(state.currentMeme.title)}" />`;
             els.searchInput.disabled = false;
@@ -696,10 +1082,45 @@
         function updateScoreUI() {
             els.score.textContent = state.score;
             els.streak.textContent = state.streak;
+
+            els.score.parentElement.classList.remove("pulse");
+            void els.score.parentElement.offsetWidth;
+            els.score.parentElement.classList.add("pulse");
+
+            els.streakBadge.classList.remove("pulse");
+            void els.streakBadge.offsetWidth;
+            els.streakBadge.classList.add("pulse");
         }
 
-        function updateAttemptUI() {
-            els.attempt.textContent = `${state.currentAttempt} of ${MAX_ATTEMPTS}`;
+        function showCombo(count) {
+            const messages = [
+                "🔥 COMBO x3!", "⚡ COMBO x5!", "💥 COMBO x7!", "🚀 COMBO x10!", "👑 LEGENDARY!"
+            ];
+            const idx = Math.min(Math.floor((count - 3) / 2), messages.length - 1);
+            els.comboDisplay.textContent = messages[idx];
+            els.comboDisplay.classList.add("show");
+            setTimeout(() => els.comboDisplay.classList.remove("show"), 2000);
+        }
+
+        function spawnConfetti() {
+            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#ff9ff3', '#667eea'];
+            const container = els.confettiContainer;
+            container.innerHTML = "";
+
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement("div");
+                confetti.className = "confetti";
+                confetti.style.left = Math.random() * 100 + "%";
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + "s";
+                confetti.style.animationDuration = (2 + Math.random() * 2) + "s";
+                confetti.style.borderRadius = Math.random() > 0.5 ? "50%" : "0";
+                confetti.style.width = (6 + Math.random() * 8) + "px";
+                confetti.style.height = (6 + Math.random() * 8) + "px";
+                container.appendChild(confetti);
+            }
+
+            setTimeout(() => { container.innerHTML = ""; }, 4000);
         }
 
         els.searchInput.addEventListener("input", (e) => {
