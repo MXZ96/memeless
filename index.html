@@ -484,7 +484,7 @@
             els.feedback.className = "feedback";
             els.feedback.textContent = "";
             els.submitBtn.classList.remove("hidden");
-            els.submitBtn.disabled = true;
+            els.submitBtn.disabled = false;
             els.retryBtn.classList.add("hidden");
             els.nextBtn.classList.add("hidden");
             els.suggestions.classList.remove("visible");
@@ -582,7 +582,6 @@
             if (results.length === 0) {
                 els.suggestions.classList.remove("visible");
                 els.suggestions.innerHTML = "";
-                els.submitBtn.disabled = true;
                 return;
             }
 
@@ -594,7 +593,6 @@
                 .join("");
             els.suggestions.classList.add("visible");
             updateSuggestionHighlight();
-            els.submitBtn.disabled = false;
         }
 
         function updateSuggestionHighlight() {
@@ -608,7 +606,6 @@
             els.searchInput.value = title;
             state.selectedIndex = state.suggestions.indexOf(title);
             els.suggestions.classList.remove("visible");
-            els.submitBtn.disabled = false;
         }
 
         function submitAnswer() {
@@ -617,7 +614,7 @@
             const answer = els.searchInput.value.trim();
             if (!answer) return;
 
-            if (answer.toLowerCase() === state.currentMeme.title.toLowerCase()) {
+            if (answer === state.currentMeme.title) {
                 handleCorrect();
             } else {
                 handleIncorrect();
@@ -670,7 +667,7 @@
             els.mediaArea.innerHTML = `<img src="${state.currentMeme.image.url}" alt="${escapeHtml(state.currentMeme.title)}" />`;
             els.searchInput.value = "";
             els.searchInput.focus();
-            els.submitBtn.disabled = true;
+            els.submitBtn.disabled = false;
             els.suggestions.classList.remove("visible");
             state.selectedIndex = -1;
         }
@@ -684,7 +681,7 @@
             els.feedback.className = "feedback";
             els.feedback.textContent = "";
             els.submitBtn.classList.remove("hidden");
-            els.submitBtn.disabled = true;
+            els.submitBtn.disabled = false;
             els.retryBtn.classList.add("hidden");
             els.nextBtn.classList.add("hidden");
             els.suggestions.classList.remove("visible");
@@ -708,7 +705,6 @@
         els.searchInput.addEventListener("input", (e) => {
             if (state.roundCompleted) return;
             const val = e.target.value.trim();
-            els.submitBtn.disabled = val.length === 0;
             showSuggestions(val);
         });
 
@@ -740,7 +736,6 @@
                 e.preventDefault();
                 if (state.selectedIndex >= 0 && state.suggestions[state.selectedIndex]) {
                     selectSuggestion(state.suggestions[state.selectedIndex]);
-                    submitAnswer();
                 } else if (els.searchInput.value.trim()) {
                     submitAnswer();
                 }
@@ -754,7 +749,6 @@
             if (!item) return;
             const title = item.getAttribute("data-title");
             selectSuggestion(title);
-            submitAnswer();
         });
 
         document.addEventListener("click", (e) => {
