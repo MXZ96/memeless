@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memeless</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -444,10 +445,119 @@
             letter-spacing: 0.04em;
         }
 
+        .file-input-wrapper {
+            display: block;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .file-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 28px 20px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            color: var(--text-dim);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: var(--bg-0);
+            text-align: center;
+            min-height: 140px;
+        }
+
+        .file-label .upload-icon {
+            font-size: 2.2rem;
+            opacity: 0.7;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+
+        .file-label .upload-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .file-label .upload-main {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .file-label .upload-sub {
+            font-size: 0.78rem;
+            color: var(--text-faint);
+            font-weight: 500;
+        }
+
         .file-input-wrapper:hover .file-label {
             border-color: var(--border-hover);
-            color: var(--text);
+            background: var(--bg-1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .file-input-wrapper:hover .file-label .upload-icon {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+
+        .file-input-wrapper.has-file .file-label {
+            border-style: solid;
+            border-color: var(--border-hover);
+            background: var(--bg-1);
+            padding: 16px 20px;
+            min-height: auto;
+        }
+
+        .file-input-wrapper.has-file .file-label .upload-icon {
+            font-size: 1.6rem;
+            opacity: 1;
+        }
+
+        .file-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 4px;
+            max-width: 100%;
+        }
+
+        .file-chip .file-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .file-chip .file-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-chip .file-size {
+            color: var(--text-faint);
+            font-size: 0.75rem;
+            font-weight: 500;
+            flex-shrink: 0;
         }
 
         .file-info {
@@ -674,11 +784,21 @@
                 <button class="modal-close" id="modal-close">&times;</button>
             </div>
             <div class="submit-body">
-                <label class="file-input-wrapper">
+                <label class="file-input-wrapper" id="file-input-wrapper">
                     <input type="file" id="submission-file" accept=".mp4" />
-                    <span class="file-label" id="file-label">Choose MP4</span>
+                    <span class="file-label" id="file-label">
+                        <span class="upload-icon">📤</span>
+                        <span class="upload-text">
+                            <span class="upload-main">Click or drag to upload</span>
+                            <span class="upload-sub">MP4 only, max 50 MB</span>
+                        </span>
+                    </span>
                 </label>
-                <div class="file-info" id="file-info"></div>
+                <div class="file-chip" id="file-chip" style="display: none;">
+                    <span class="file-icon">🎬</span>
+                    <span class="file-name" id="chip-name"></span>
+                    <span class="file-size" id="chip-size"></span>
+                </div>
                 <button id="submit-meme-btn" class="btn btn-primary" disabled>Submit Meme</button>
                 <div class="submit-status" id="submit-status"></div>
             </div>
@@ -1185,8 +1305,10 @@
         function openSubmitModal() {
             subEls.overlay.classList.add("visible");
             subEls.fileInput.value = "";
-            subEls.fileLabel.textContent = "Choose MP4";
-            subEls.fileInfo.textContent = "";
+            const wrapper = document.getElementById("file-input-wrapper");
+            const chip = document.getElementById("file-chip");
+            wrapper.classList.remove("has-file");
+            chip.style.display = "none";
             subEls.status.className = "submit-status";
             subEls.status.textContent = "";
             subEls.submitBtn.disabled = true;
@@ -1204,9 +1326,14 @@
 
         subEls.fileInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
+            const wrapper = document.getElementById("file-input-wrapper");
+            const chip = document.getElementById("file-chip");
+            const chipName = document.getElementById("chip-name");
+            const chipSize = document.getElementById("chip-size");
+
             if (!file) {
-                subEls.fileLabel.textContent = "Choose MP4";
-                subEls.fileInfo.textContent = "";
+                wrapper.classList.remove("has-file");
+                chip.style.display = "none";
                 subEls.submitBtn.disabled = true;
                 return;
             }
@@ -1215,23 +1342,29 @@
             const isMp4 = file.type === "video/mp4" && lower.endsWith(".mp4");
 
             if (!isMp4) {
-                subEls.fileLabel.textContent = "Choose MP4";
-                subEls.fileInfo.textContent = "Only .mp4 files are allowed.";
+                wrapper.classList.remove("has-file");
+                chip.style.display = "none";
+                subEls.status.className = "submit-status error";
+                subEls.status.textContent = "Only .mp4 files are allowed.";
                 subEls.submitBtn.disabled = true;
                 subEls.fileInput.value = "";
                 return;
             }
 
             if (file.size > MAX_FILE_SIZE) {
-                subEls.fileLabel.textContent = "Choose MP4";
-                subEls.fileInfo.textContent = "File too large. Maximum 50 MB.";
+                wrapper.classList.remove("has-file");
+                chip.style.display = "none";
+                subEls.status.className = "submit-status error";
+                subEls.status.textContent = "File too large. Maximum 50 MB.";
                 subEls.submitBtn.disabled = true;
                 subEls.fileInput.value = "";
                 return;
             }
 
-            subEls.fileLabel.textContent = "Change file";
-            subEls.fileInfo.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
+            wrapper.classList.add("has-file");
+            chip.style.display = "inline-flex";
+            chipName.textContent = file.name;
+            chipSize.textContent = (file.size / 1024 / 1024).toFixed(1) + " MB";
             subEls.submitBtn.disabled = false;
             subEls.status.className = "submit-status";
             subEls.status.textContent = "";
@@ -1272,8 +1405,10 @@
                 subEls.status.className = "submit-status success";
                 subEls.status.textContent = "Meme submitted successfully! It will be reviewed by an admin.";
                 subEls.fileInput.value = "";
-                subEls.fileLabel.textContent = "Choose MP4";
-                subEls.fileInfo.textContent = "";
+                const wrapper = document.getElementById("file-input-wrapper");
+                const chip = document.getElementById("file-chip");
+                wrapper.classList.remove("has-file");
+                chip.style.display = "none";
                 subEls.submitBtn.disabled = true;
 
                 setTimeout(closeSubmitModal, 1500);
