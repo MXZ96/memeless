@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tebak Meme 🧠</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700;900&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <title>Memeless</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -13,264 +14,183 @@
         }
 
         :root {
-            --bg-1: #667eea;
-            --bg-2: #764ba2;
-            --surface: rgba(255, 255, 255, 0.95);
-            --surface-glass: rgba(255, 255, 255, 0.75);
-            --surface-dark: rgba(20, 20, 30, 0.85);
-            --text: #1a1a2e;
-            --text-light: #fff;
-            --text-dim: #666;
-            --accent: #ff6b6b;
-            --accent-2: #feca57;
-            --accent-3: #48dbfb;
-            --correct: #1dd1a1;
-            --incorrect: #ff6b6b;
-            --border: rgba(255, 255, 255, 0.3);
-            --shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            --radius: 24px;
-            --radius-sm: 16px;
+            --bg-0: #0a0a0b;
+            --bg-1: #111113;
+            --bg-2: #1a1a1d;
+            --bg-3: #222226;
+            --bg-4: #2a2a2f;
+            --border: #2e2e33;
+            --border-hover: #3e3e44;
+            --text: #ececec;
+            --text-dim: #888890;
+            --text-faint: #55555a;
+            --accent: #888;
+            --accent-hover: #aaa;
+            --correct: #3fb950;
+            --correct-dim: rgba(63, 185, 80, 0.12);
+            --incorrect: #f85149;
+            --incorrect-dim: rgba(248, 81, 73, 0.12);
+            --radius: 20px;
+            --radius-sm: 14px;
         }
 
         body {
-            font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-0);
+            color: var(--text);
+            height: 100dvh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        .bg-shapes {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
+            padding: 0;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
             overflow: hidden;
-            z-index: 0;
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(40px);
-            opacity: 0.5;
-            animation: floatShape 20s infinite ease-in-out;
-        }
-
-        .shape:nth-child(1) {
-            width: 300px;
-            height: 300px;
-            background: #feca57;
-            top: -100px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-
-        .shape:nth-child(2) {
-            width: 400px;
-            height: 400px;
-            background: #ff6b6b;
-            bottom: -150px;
-            right: -150px;
-            animation-delay: -7s;
-        }
-
-        .shape:nth-child(3) {
-            width: 250px;
-            height: 250px;
-            background: #48dbfb;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation-delay: -14s;
-        }
-
-        .shape:nth-child(4) {
-            width: 200px;
-            height: 200px;
-            background: #1dd1a1;
-            top: 20%;
-            right: 10%;
-            animation-delay: -3s;
-        }
-
-        .shape:nth-child(5) {
-            width: 180px;
-            height: 180px;
-            background: #ff9ff3;
-            bottom: 20%;
-            left: 10%;
-            animation-delay: -10s;
-        }
-
-        @keyframes floatShape {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(30px, -30px) scale(1.1); }
-            50% { transform: translate(-20px, 20px) scale(0.9); }
-            75% { transform: translate(20px, 10px) scale(1.05); }
         }
 
         .container {
             width: 100%;
             max-width: 600px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .game-wrapper {
-            background: var(--surface-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .game-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #1dd1a1, #ff9ff3);
-            background-size: 200% 100%;
-            animation: gradientShift 3s linear infinite;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
+            margin: auto;
+            padding: 0 16px;
         }
 
         header {
             text-align: center;
-            padding: 28px 24px 16px;
-            position: relative;
+            padding: 16px 0 12px;
         }
 
-        .mascot {
-            font-size: 3.5rem;
-            animation: bounce 2s infinite;
-            display: inline-block;
-            margin-bottom: 8px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        header h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -1px;
-            line-height: 1.1;
-        }
-
-        header h1 span {
-            background: linear-gradient(135deg, #ff6b6b, #feca57);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stats-row {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-
-        .stat-badge {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            border-radius: 50px;
-            padding: 8px 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text);
+        .logo-row {
             display: flex;
             align-items: center;
-            gap: 6px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
-        .stat-badge.pulse {
-            animation: pulseBadge 0.4s ease;
-        }
-
-        @keyframes pulseBadge {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
-        }
-
-        .stat-badge .icon {
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.2rem;
         }
 
-        .stat-badge strong {
-            color: var(--bg-1);
-            font-size: 1.1rem;
-            min-width: 24px;
-            display: inline-block;
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text);
+        }
+
+        header h1 span {
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .stat-card {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 8px;
             text-align: center;
+            transition: border-color 0.2s, background 0.2s;
         }
 
-        .progress-bar-wrapper {
-            margin: 0 24px 16px;
-            height: 10px;
-            background: rgba(0,0,0,0.08);
-            border-radius: 10px;
+        .stat-card .stat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-faint);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-card.highlight {
+            border-color: var(--border-hover);
+            background: var(--bg-2);
+        }
+
+        .stat-card.pulse {
+            animation: pulseStat 0.35s ease;
+        }
+
+        @keyframes pulseStat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+            100% { transform: scale(1); }
+        }
+
+        .attempt-tracker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .attempt-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--bg-4);
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .attempt-dot.used {
+            background: var(--incorrect);
+            transform: scale(0.8);
+        }
+
+        .attempt-dot.available {
+            background: var(--text-dim);
+        }
+
+        .attempt-text {
+            font-size: 0.75rem;
+            color: var(--text-faint);
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .game-card {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             overflow: hidden;
-            position: relative;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #1dd1a1, #48dbfb);
-            border-radius: 10px;
-            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-        }
-
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            margin-top: 8px;
         }
 
         .media-area {
             width: 100%;
             aspect-ratio: 16 / 9;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: var(--bg-0);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
-            margin: 0 16px;
-            border-radius: var(--radius-sm);
+            border-bottom: 1px solid var(--border);
         }
 
         .media-area img,
@@ -279,65 +199,103 @@
             height: 100%;
             object-fit: contain;
             display: block;
-            animation: fadeInMedia 0.4s ease;
+            opacity: 0;
+            animation: fadeIn 0.35s ease forwards;
         }
 
-        @keyframes fadeInMedia {
-            from { opacity: 0; transform: scale(0.95); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.97); }
             to { opacity: 1; transform: scale(1); }
         }
 
         .media-area.shake {
-            animation: shake 0.5s ease;
+            animation: shake 0.45s ease;
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-10px); }
-            40% { transform: translateX(10px); }
-            60% { transform: translateX(-10px); }
-            80% { transform: translateX(10px); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
         }
 
-        .loading-spinner {
+        .loading-state {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
-            color: var(--text-dim);
-            font-weight: 600;
+            gap: 8px;
+            color: var(--text-faint);
+            font-weight: 500;
+            font-size: 0.8rem;
         }
 
-        .spinner-emoji {
-            font-size: 3rem;
-            animation: spin 1s linear infinite;
+        .loading-dots {
+            display: flex;
+            gap: 4px;
         }
 
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .loading-dots span {
+            width: 6px;
+            height: 6px;
+            background: var(--text-faint);
+            border-radius: 50%;
+            animation: dotPulse 1.2s infinite ease-in-out;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
         }
 
         .status {
             text-align: center;
-            padding: 20px;
+            padding: 24px 20px;
             color: var(--text-dim);
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .status.error {
-            color: #e74c3c;
+            color: var(--incorrect);
         }
 
         .status h2 {
             color: var(--text);
             margin-bottom: 8px;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 700;
         }
 
+        .feedback {
+            text-align: center;
+            padding: 10px 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: none;
+            margin: 0 10px;
+            border-radius: var(--radius-sm);
+            margin-top: 8px;
+        }
+
+        .feedback.correct {
+            display: block;
+            color: var(--correct);
+            background: var(--correct-dim);
+            border: 1px solid rgba(63, 185, 80, 0.2);
+        }
+
+        .feedback.incorrect {
+            display: block;
+            color: var(--incorrect);
+            background: var(--incorrect-dim);
+            border: 1px solid rgba(248, 81, 73, 0.2);
+        }
+
         .search-section {
-            padding: 20px;
+            padding: 10px;
         }
 
         .search-wrapper {
@@ -346,62 +304,42 @@
 
         .search-wrapper input {
             width: 100%;
-            padding: 16px 20px 16px 50px;
+            padding: 12px 14px;
             border-radius: var(--radius-sm);
-            border: 3px solid transparent;
-            background: #fff;
+            border: 1px solid var(--border);
+            background: var(--bg-2);
             color: var(--text);
-            font-size: 1.05rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            font-weight: 500;
             font-family: inherit;
             outline: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
         }
 
         .search-wrapper input:focus {
-            border-color: var(--bg-1);
-            box-shadow: 0 0 0 6px rgba(102, 126, 234, 0.15), 0 8px 25px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
+            border-color: var(--border-hover);
+            background: var(--bg-3);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.03);
         }
 
         .search-wrapper input::placeholder {
-            color: #aaa;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.3rem;
-            pointer-events: none;
-            transition: transform 0.3s;
-        }
-
-        .search-wrapper input:focus ~ .search-icon {
-            transform: translateY(-50%) scale(1.2);
+            color: var(--text-faint);
+            font-weight: 400;
         }
 
         .suggestions {
             position: absolute;
-            top: calc(100% + 8px);
+            top: calc(100% + 6px);
             left: 0;
             right: 0;
-            background: #fff;
-            border: 3px solid var(--border);
+            background: var(--bg-2);
+            border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            max-height: 260px;
+            max-height: 240px;
             overflow-y: auto;
             z-index: 100;
             display: none;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            animation: slideDown 0.2s ease;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
         }
 
         .suggestions.visible {
@@ -409,12 +347,12 @@
         }
 
         .suggestion-item {
-            padding: 14px 20px;
+            padding: 12px 16px;
             cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 600;
-            transition: all 0.15s;
-            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.1s;
+            border-bottom: 1px solid var(--border);
         }
 
         .suggestion-item:last-child {
@@ -423,248 +361,277 @@
 
         .suggestion-item:hover,
         .suggestion-item.active {
-            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            color: var(--bg-1);
+            background: var(--bg-3);
         }
 
         .suggestion-item .match {
-            background: linear-gradient(135deg, #ff6b6b, #feca57);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 900;
+            color: var(--text);
+            font-weight: 700;
+            background: var(--bg-4);
+            padding: 1px 4px;
+            border-radius: 4px;
         }
 
         .actions {
             display: flex;
             gap: 10px;
-            padding: 0 20px 20px;
+            padding: 0 16px 16px;
         }
 
         .btn {
             flex: 1;
-            padding: 16px;
+            padding: 14px;
             border: none;
             border-radius: var(--radius-sm);
-            font-weight: 700;
-            font-size: 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             font-family: inherit;
-            position: relative;
-            overflow: hidden;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            background: var(--bg-3);
+            color: var(--text);
+            border: 1px solid var(--border-hover);
         }
 
         .btn-primary:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            background: var(--bg-4);
+            border-color: var(--text-faint);
         }
 
         .btn-primary:active:not(:disabled) {
-            transform: translateY(-1px);
+            transform: scale(0.98);
         }
 
         .btn-secondary {
-            background: #fff;
-            color: var(--text);
-            border: 3px solid #eee;
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
         }
 
         .btn-secondary:hover:not(:disabled) {
-            border-color: var(--bg-1);
-            color: var(--bg-1);
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-color: var(--border-hover);
+            color: var(--text);
+            background: var(--bg-2);
         }
 
         .btn:disabled {
-            opacity: 0.4;
+            opacity: 0.3;
             cursor: not-allowed;
             transform: none !important;
-            box-shadow: none !important;
-        }
-
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.5s, height 0.5s;
-        }
-
-        .btn:active:not(:disabled)::after {
-            width: 300px;
-            height: 300px;
-        }
-
-        .feedback {
-            text-align: center;
-            padding: 16px;
-            font-weight: 800;
-            font-size: 1.1rem;
-            display: none;
-            margin: 0 16px;
-            border-radius: var(--radius-sm);
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .feedback.correct {
-            display: block;
-            color: #fff;
-            background: linear-gradient(135deg, #1dd1a1, #10ac84);
-            box-shadow: 0 4px 15px rgba(29, 209, 161, 0.4);
-        }
-
-        .feedback.incorrect {
-            display: block;
-            color: #fff;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
         }
 
         .hint {
             text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            padding: 4px 20px 0;
-            font-weight: 600;
-        }
-
-        .retry-btn {
-            margin-top: 12px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-weight: 700;
-            font-family: inherit;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .retry-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            font-size: 0.78rem;
+            color: var(--text-faint);
+            padding: 2px 16px 0;
+            font-weight: 500;
         }
 
         .hidden {
             display: none !important;
         }
 
-        .confetti-container {
+        .footer-credit {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.72rem;
+            color: var(--text-faint);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+        }
+
+        .file-input-wrapper:hover .file-label {
+            border-color: var(--border-hover);
+            color: var(--text);
+            background: var(--bg-2);
+        }
+
+        .file-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .submit-status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        .submit-status.success {
+            display: block;
+            color: var(--correct);
+        }
+
+        .submit-status.error {
+            display: block;
+            color: var(--incorrect);
+        }
+
+        .bottom-bar {
             position: fixed;
-            top: 0;
+            bottom: 0;
             left: 0;
+            right: 0;
+            background: var(--bg-1);
+            border-top: 1px solid var(--border);
+            padding: 10px 16px;
+            display: flex;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .bottom-bar-inner {
             width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1000;
-            overflow: hidden;
+            max-width: 680px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
         }
 
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            top: -10px;
-            animation: confettiFall 3s ease-out forwards;
+        .bottom-bar .btn {
+            flex: none;
+            width: auto;
+            padding: 10px 18px;
+            font-size: 0.85rem;
         }
 
-        @keyframes confettiFall {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-
-        .combo-display {
+        .submit-overlay {
             position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .submit-overlay.visible {
+            display: flex;
+        }
+
+        .submit-modal {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 90dvh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .submit-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .submit-modal-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-dim);
             font-size: 1.5rem;
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 500;
-            pointer-events: none;
-            opacity: 0;
-            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.15s;
         }
 
-        .combo-display.show {
-            opacity: 1;
-            animation: comboBounce 0.5s ease;
+        .modal-close:hover {
+            background: var(--bg-2);
+            color: var(--text);
         }
 
-        @keyframes comboBounce {
-            0% { transform: translateX(-50%) scale(0.5); }
-            50% { transform: translateX(-50%) scale(1.3); }
-            100% { transform: translateX(-50%) scale(1); }
+        .container {
+            padding-bottom: 70px;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                max-width: 100%;
+            }
         }
 
         @media (max-width: 480px) {
-            body { padding: 12px; }
-            header h1 { font-size: 1.7rem; }
-            .stats-row { gap: 8px; }
-            .stat-badge { padding: 6px 14px; font-size: 0.8rem; }
+            body { padding: 0; }
+            header { padding: 12px 12px 8px; }
+            header h1 { font-size: 1.4rem; }
+            .stats-grid { gap: 6px; }
+            .stat-card { padding: 8px 6px; }
+            .stat-card .stat-value { font-size: 1rem; }
+            .stat-card .stat-label { font-size: 0.6rem; }
             .actions { flex-direction: column; }
             .btn { width: 100%; }
+            .container { padding: 0 10px 70px; }
+            .submit-modal { padding: 18px; }
         }
     </style>
 </head>
 <body>
-    <div class="bg-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
-
-    <div class="combo-display" id="combo-display">🔥 COMBO x3!</div>
-    <div class="confetti-container" id="confetti-container"></div>
-
     <div class="container">
-        <div class="game-wrapper">
-            <header>
-                <div class="mascot" id="mascot">🤔</div>
-                <h1>Tebak <span>Meme</span></h1>
-                <div class="stats-row">
-                    <div class="stat-badge">
-                        <span class="icon">⭐</span>
-                        Score: <strong id="score">0</strong>
-                    </div>
-                    <div class="stat-badge" id="streak-badge">
-                        <span class="icon">🔥</span>
-                        Streak: <strong id="streak">0</strong>
-                    </div>
+        <header>
+            <div class="logo-row">
+                <div class="logo-icon">🧠</div>
+                <h1>Meme <span>Less</span></h1>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card" id="score-card">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="score">0</div>
                 </div>
-                <div class="progress-bar-wrapper">
-                    <div class="progress-bar" id="progress-bar" style="width: 100%;"></div>
+                <div class="stat-card highlight" id="streak-card">
+                    <div class="stat-label">Streak</div>
+                    <div class="stat-value" id="streak">0</div>
                 </div>
-            </header>
+                <div class="stat-card" id="round-card">
+                    <div class="stat-label">Round</div>
+                    <div class="stat-value" id="round">1</div>
+                </div>
+            </div>
+            <div class="attempt-tracker" id="attempt-tracker">
+                <div class="attempt-dot available"></div>
+                <div class="attempt-dot available"></div>
+                <div class="attempt-dot available"></div>
+                <div class="attempt-dot available"></div>
+                <div class="attempt-dot available"></div>
+                <span class="attempt-text" id="attempt-text">5 attempts left</span>
+            </div>
+        </header>
 
+        <div class="game-card">
             <div class="media-area" id="media-area">
-                <div class="loading-spinner">
-                    <div class="spinner-emoji">🎭</div>
-                    <div>Loading epic memes...</div>
+                <div class="loading-state">
+                    <div class="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div>Loading memes...</div>
                 </div>
             </div>
 
@@ -679,16 +646,41 @@
                         autocomplete="off"
                         disabled
                     />
-                    <span class="search-icon">🔍</span>
                     <div class="suggestions" id="suggestions"></div>
                 </div>
-                <div class="hint" id="hint">Ketik jawabanmu atau pilih dari daftar 😎</div>
+                <div class="hint" id="hint">Ketik atau pilih dari saran</div>
             </div>
 
             <div class="actions">
-                <button id="submit-btn" disabled class="btn btn-primary">🚀 Submit</button>
-                <button id="retry-btn" class="btn btn-secondary hidden">🔄 Retry</button>
-                <button id="next-btn" class="btn btn-secondary hidden">⏭️ Next</button>
+                <button id="submit-btn" disabled class="btn btn-primary">Submit</button>
+                <button id="retry-btn" class="btn btn-secondary hidden">Retry</button>
+                <button id="next-btn" class="btn btn-secondary hidden">Next</button>
+            </div>
+        </div>
+
+        <div class="footer-credit">Memeless — dark mode</div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="bottom-bar-inner">
+            <button id="open-submit" class="btn btn-primary">+ Submit Meme</button>
+        </div>
+    </div>
+
+    <div class="submit-overlay" id="submit-overlay">
+        <div class="submit-modal">
+            <div class="submit-modal-header">
+                <h2>Submit a Meme</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="submit-body">
+                <label class="file-input-wrapper">
+                    <input type="file" id="submission-file" accept=".mp4" />
+                    <span class="file-label" id="file-label">Choose MP4</span>
+                </label>
+                <div class="file-info" id="file-info"></div>
+                <button id="submit-meme-btn" class="btn btn-primary" disabled>Submit Meme</button>
+                <div class="submit-status" id="submit-status"></div>
             </div>
         </div>
     </div>
@@ -702,6 +694,7 @@
         };
 
         const MAX_ATTEMPTS = 5;
+        const MEME_COOLDOWN = 5;
 
         const state = {
             memes: [],
@@ -709,16 +702,17 @@
             currentMeme: null,
             score: 0,
             streak: 0,
+            roundNumber: 1,
             currentAttempt: 1,
             roundCompleted: false,
             selectedIndex: -1,
             suggestions: [],
-            lastMemeIndex: -1
+            lastMemeIndex: -1,
+            cooldowns: {}
         };
 
         const els = {
             mediaArea: document.getElementById("media-area"),
-            status: document.getElementById("status"),
             feedback: document.getElementById("feedback"),
             searchInput: document.getElementById("search-input"),
             suggestions: document.getElementById("suggestions"),
@@ -727,13 +721,13 @@
             nextBtn: document.getElementById("next-btn"),
             score: document.getElementById("score"),
             streak: document.getElementById("streak"),
-            streakBadge: document.getElementById("streak-badge"),
-            attempt: document.getElementById("attempt"),
-            hint: document.getElementById("hint"),
-            progressBar: document.getElementById("progress-bar"),
-            mascot: document.getElementById("mascot"),
-            comboDisplay: document.getElementById("combo-display"),
-            confettiContainer: document.getElementById("confetti-container")
+            round: document.getElementById("round"),
+            scoreCard: document.getElementById("score-card"),
+            streakCard: document.getElementById("streak-card"),
+            roundCard: document.getElementById("round-card"),
+            attemptTracker: document.getElementById("attempt-tracker"),
+            attemptText: document.getElementById("attempt-text"),
+            hint: document.getElementById("hint")
         };
 
         function githubApiUrl() {
@@ -746,9 +740,13 @@
 
         async function loadMemes() {
             els.mediaArea.innerHTML = `
-                <div class="loading-spinner">
-                    <div class="spinner-emoji">🎭</div>
-                    <div>Loading epic memes...</div>
+                <div class="loading-state">
+                    <div class="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div>Loading memes...</div>
                 </div>
             `;
             els.searchInput.disabled = true;
@@ -767,7 +765,7 @@
                 if (pairs.length === 0) {
                     els.mediaArea.innerHTML = `
                         <div class="status error">
-                            <h2>😿 No memes found!</h2>
+                            <h2>No memes found</h2>
                             Upload matching .jpg/.png and .mp4 files<br>to the memes folder.
                         </div>
                     `;
@@ -777,6 +775,7 @@
                 pairs.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
                 state.memes = pairs;
                 state.searchIndex = pairs.map(m => m.title);
+                state.cooldowns = {};
 
                 els.mediaArea.innerHTML = "";
                 els.searchInput.disabled = false;
@@ -788,15 +787,10 @@
                 console.error(err);
                 els.mediaArea.innerHTML = `
                     <div class="status error">
-                        <h2>💥 Failed to load memes</h2>
-                        Please check:<br>
-                        - GitHub repository<br>
-                        - Repository name<br>
-                        - Branch<br>
-                        - Memes folder<br>
-                        - Internet connection
+                        <h2>Failed to load memes</h2>
+                        Please check your connection and repo settings.
                         <br>
-                        <button class="retry-btn" onclick="loadMemes()">🔄 Try Again</button>
+                        <button class="btn btn-primary" style="margin-top:12px;padding:10px 20px;font-size:0.85rem;" onclick="loadMemes()">Retry</button>
                     </div>
                 `;
             }
@@ -857,19 +851,33 @@
             els.nextBtn.classList.add("hidden");
             els.suggestions.classList.remove("visible");
             els.hint.style.display = "block";
-            updateProgressUI();
-            els.mascot.textContent = "🤔";
+            updateAttemptUI();
 
             if (state.memes.length === 0) return;
 
-            let idx;
-            if (state.memes.length === 1) {
-                idx = 0;
-            } else {
-                do {
-                    idx = Math.floor(Math.random() * state.memes.length);
-                } while (idx === state.lastMemeIndex);
+            for (const key in state.cooldowns) {
+                if (state.cooldowns[key] > 0) state.cooldowns[key]--;
             }
+
+            let eligibleIndices = state.memes
+                .map((_, i) => i)
+                .filter(i => !state.cooldowns[i] || state.cooldowns[i] <= 0);
+
+            if (eligibleIndices.length === 0) {
+                state.cooldowns = {};
+                eligibleIndices = state.memes.map((_, i) => i);
+            }
+
+            let idx;
+            if (eligibleIndices.length === 1) {
+                idx = eligibleIndices[0];
+            } else {
+                const pool = eligibleIndices.filter(i => i !== state.lastMemeIndex);
+                const pickFrom = pool.length > 0 ? pool : eligibleIndices;
+                idx = pickFrom[Math.floor(Math.random() * pickFrom.length)];
+            }
+
+            state.cooldowns[idx] = MEME_COOLDOWN;
             state.lastMemeIndex = idx;
             state.currentMeme = state.memes[idx];
 
@@ -977,9 +985,19 @@
             els.suggestions.classList.remove("visible");
         }
 
-        function updateProgressUI() {
-            const pct = ((MAX_ATTEMPTS - state.currentAttempt + 1) / MAX_ATTEMPTS) * 100;
-            els.progressBar.style.width = pct + "%";
+        function updateAttemptUI() {
+            const dots = els.attemptTracker.querySelectorAll(".attempt-dot");
+            dots.forEach((dot, i) => {
+                dot.className = "attempt-dot " + (i < state.currentAttempt - 1 ? "used" : "available");
+            });
+            const left = MAX_ATTEMPTS - state.currentAttempt + 1;
+            els.attemptText.textContent = left === 1 ? "last attempt" : `${left} attempts left`;
+        }
+
+        function pulseCard(card) {
+            card.classList.remove("pulse");
+            void card.offsetWidth;
+            card.classList.add("pulse");
         }
 
         function submitAnswer() {
@@ -1000,23 +1018,20 @@
             const scoreGained = MAX_ATTEMPTS - state.currentAttempt + 1;
             state.score += scoreGained;
             state.streak += 1;
+            state.roundNumber++;
             updateScoreUI();
+            pulseCard(els.scoreCard);
+            pulseCard(els.streakCard);
+            pulseCard(els.roundCard);
 
-            els.mascot.textContent = "😎";
             els.feedback.className = "feedback correct";
-            els.feedback.innerHTML = `🎉 BENAR! +${scoreGained} poin!<br><small>Mantap banget!</small>`;
+            els.feedback.textContent = `Correct — attempt ${state.currentAttempt} of ${MAX_ATTEMPTS} (+${scoreGained})`;
             els.submitBtn.classList.add("hidden");
             els.retryBtn.classList.add("hidden");
             els.nextBtn.classList.remove("hidden");
             els.hint.style.display = "none";
             els.searchInput.disabled = true;
             els.suggestions.classList.remove("visible");
-            updateProgressUI();
-
-            if (state.streak >= 3) {
-                showCombo(state.streak);
-                spawnConfetti();
-            }
 
             els.mediaArea.innerHTML = `<video src="${state.currentMeme.video.url}" controls autoplay style="width:100%;height:100%;object-fit:contain;"></video>`;
         }
@@ -1024,31 +1039,30 @@
         function handleIncorrect() {
             state.streak = 0;
             updateScoreUI();
-            els.mascot.textContent = "😵";
+            pulseCard(els.streakCard);
             els.mediaArea.classList.add("shake");
-            setTimeout(() => els.mediaArea.classList.remove("shake"), 500);
+            setTimeout(() => els.mediaArea.classList.remove("shake"), 450);
 
             if (state.currentAttempt >= MAX_ATTEMPTS) {
                 state.roundCompleted = true;
                 els.feedback.className = "feedback incorrect";
-                els.feedback.innerHTML = `❌ Yah gagal...<br><small>Jawabannya: <strong>"${escapeHtml(state.currentMeme.title)}"</strong></small>`;
+                els.feedback.innerHTML = `Out of attempts<br><br>Correct answer: <strong>"${escapeHtml(state.currentMeme.title)}"</strong>`;
                 els.submitBtn.classList.add("hidden");
                 els.retryBtn.classList.remove("hidden");
                 els.nextBtn.classList.remove("hidden");
                 els.hint.style.display = "none";
                 els.searchInput.disabled = true;
                 els.suggestions.classList.remove("visible");
-                updateProgressUI();
 
                 els.mediaArea.innerHTML = `<video src="${state.currentMeme.video.url}" controls autoplay style="width:100%;height:100%;object-fit:contain;"></video>`;
                 return;
             }
 
             state.currentAttempt++;
-            updateProgressUI();
+            updateAttemptUI();
 
             els.feedback.className = "feedback incorrect";
-            els.feedback.textContent = `❌ Salah! Coba lagi! (${state.currentAttempt}/${MAX_ATTEMPTS})`;
+            els.feedback.textContent = `Incorrect — attempt ${state.currentAttempt} of ${MAX_ATTEMPTS}`;
             els.mediaArea.innerHTML = `<img src="${state.currentMeme.image.url}" alt="${escapeHtml(state.currentMeme.title)}" />`;
             els.searchInput.value = "";
             els.searchInput.focus();
@@ -1071,8 +1085,7 @@
             els.nextBtn.classList.add("hidden");
             els.suggestions.classList.remove("visible");
             els.hint.style.display = "block";
-            els.mascot.textContent = "🤔";
-            updateProgressUI();
+            updateAttemptUI();
 
             els.mediaArea.innerHTML = `<img src="${state.currentMeme.image.url}" alt="${escapeHtml(state.currentMeme.title)}" />`;
             els.searchInput.disabled = false;
@@ -1082,45 +1095,7 @@
         function updateScoreUI() {
             els.score.textContent = state.score;
             els.streak.textContent = state.streak;
-
-            els.score.parentElement.classList.remove("pulse");
-            void els.score.parentElement.offsetWidth;
-            els.score.parentElement.classList.add("pulse");
-
-            els.streakBadge.classList.remove("pulse");
-            void els.streakBadge.offsetWidth;
-            els.streakBadge.classList.add("pulse");
-        }
-
-        function showCombo(count) {
-            const messages = [
-                "🔥 COMBO x3!", "⚡ COMBO x5!", "💥 COMBO x7!", "🚀 COMBO x10!", "👑 LEGENDARY!"
-            ];
-            const idx = Math.min(Math.floor((count - 3) / 2), messages.length - 1);
-            els.comboDisplay.textContent = messages[idx];
-            els.comboDisplay.classList.add("show");
-            setTimeout(() => els.comboDisplay.classList.remove("show"), 2000);
-        }
-
-        function spawnConfetti() {
-            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#ff9ff3', '#667eea'];
-            const container = els.confettiContainer;
-            container.innerHTML = "";
-
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement("div");
-                confetti.className = "confetti";
-                confetti.style.left = Math.random() * 100 + "%";
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.animationDelay = Math.random() * 0.5 + "s";
-                confetti.style.animationDuration = (2 + Math.random() * 2) + "s";
-                confetti.style.borderRadius = Math.random() > 0.5 ? "50%" : "0";
-                confetti.style.width = (6 + Math.random() * 8) + "px";
-                confetti.style.height = (6 + Math.random() * 8) + "px";
-                container.appendChild(confetti);
-            }
-
-            setTimeout(() => { container.innerHTML = ""; }, 4000);
+            els.round.textContent = state.roundNumber;
         }
 
         els.searchInput.addEventListener("input", (e) => {
@@ -1181,6 +1156,134 @@
         els.submitBtn.addEventListener("click", submitAnswer);
         els.retryBtn.addEventListener("click", retryRound);
         els.nextBtn.addEventListener("click", startRound);
+
+        // --- Submission System ---
+        const SUPABASE_URL = "https://irvyihmyrdxrjhbepshv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_YSvGNFDTf7RrmRD3gTeOfw_vITAYU0e";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+        const subEls = {
+            fileInput: document.getElementById("submission-file"),
+            fileLabel: document.getElementById("file-label"),
+            fileInfo: document.getElementById("file-info"),
+            submitBtn: document.getElementById("submit-meme-btn"),
+            status: document.getElementById("submit-status"),
+            overlay: document.getElementById("submit-overlay"),
+            openBtn: document.getElementById("open-submit"),
+            closeBtn: document.getElementById("modal-close")
+        };
+
+        function sanitizeFilename(name) {
+            return name
+                .replace(/[\/\\:*?"<>|]/g, "_")
+                .replace(/\s+/g, " ")
+                .trim()
+                .slice(0, 200);
+        }
+
+        function openSubmitModal() {
+            subEls.overlay.classList.add("visible");
+            subEls.fileInput.value = "";
+            subEls.fileLabel.textContent = "Choose MP4";
+            subEls.fileInfo.textContent = "";
+            subEls.status.className = "submit-status";
+            subEls.status.textContent = "";
+            subEls.submitBtn.disabled = true;
+        }
+
+        function closeSubmitModal() {
+            subEls.overlay.classList.remove("visible");
+        }
+
+        subEls.openBtn.addEventListener("click", openSubmitModal);
+        subEls.closeBtn.addEventListener("click", closeSubmitModal);
+        subEls.overlay.addEventListener("click", (e) => {
+            if (e.target === subEls.overlay) closeSubmitModal();
+        });
+
+        subEls.fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) {
+                subEls.fileLabel.textContent = "Choose MP4";
+                subEls.fileInfo.textContent = "";
+                subEls.submitBtn.disabled = true;
+                return;
+            }
+
+            const lower = file.name.toLowerCase();
+            const isMp4 = file.type === "video/mp4" && lower.endsWith(".mp4");
+
+            if (!isMp4) {
+                subEls.fileLabel.textContent = "Choose MP4";
+                subEls.fileInfo.textContent = "Only .mp4 files are allowed.";
+                subEls.submitBtn.disabled = true;
+                subEls.fileInput.value = "";
+                return;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                subEls.fileLabel.textContent = "Choose MP4";
+                subEls.fileInfo.textContent = "File too large. Maximum 50 MB.";
+                subEls.submitBtn.disabled = true;
+                subEls.fileInput.value = "";
+                return;
+            }
+
+            subEls.fileLabel.textContent = "Change file";
+            subEls.fileInfo.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
+            subEls.submitBtn.disabled = false;
+            subEls.status.className = "submit-status";
+            subEls.status.textContent = "";
+        });
+
+        subEls.submitBtn.addEventListener("click", async () => {
+            const file = subEls.fileInput.files[0];
+            if (!file) return;
+
+            subEls.submitBtn.disabled = true;
+            subEls.status.className = "submit-status";
+            subEls.status.textContent = "Uploading...";
+
+            const id = crypto.randomUUID();
+            const safeName = sanitizeFilename(file.name);
+            const storagePath = `pending/${id}.mp4`;
+
+            try {
+                const { error: uploadError } = await supabaseClient.storage
+                    .from("memeless-submissions")
+                    .upload(storagePath, file, {
+                        contentType: "video/mp4",
+                        upsert: false
+                    });
+
+                if (uploadError) throw uploadError;
+
+                const { error: dbError } = await supabaseClient
+                    .from("submissions")
+                    .insert({
+                        original_filename: safeName,
+                        storage_path: storagePath,
+                        status: "pending"
+                    });
+
+                if (dbError) throw dbError;
+
+                subEls.status.className = "submit-status success";
+                subEls.status.textContent = "Meme submitted successfully! It will be reviewed by an admin.";
+                subEls.fileInput.value = "";
+                subEls.fileLabel.textContent = "Choose MP4";
+                subEls.fileInfo.textContent = "";
+                subEls.submitBtn.disabled = true;
+
+                setTimeout(closeSubmitModal, 1500);
+            } catch (err) {
+                console.error(err);
+                subEls.status.className = "submit-status error";
+                subEls.status.textContent = "Upload failed. Please try again.";
+                subEls.submitBtn.disabled = false;
+            }
+        });
 
         loadMemes();
     </script>
