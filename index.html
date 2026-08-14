@@ -621,8 +621,17 @@
             opacity: 1;
         }
 
-        .file-chip {
-            display: inline-flex;
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
             align-items: center;
             gap: 8px;
             background: var(--bg-2);
@@ -632,26 +641,48 @@
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--text);
-            margin-top: 4px;
             max-width: 100%;
         }
 
-        .file-chip .file-icon {
+        .file-item .file-icon {
             font-size: 1.1rem;
             flex-shrink: 0;
         }
 
-        .file-chip .file-name {
+        .file-item .file-name {
+            flex: 1;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .file-chip .file-size {
+        .file-item .file-size {
             color: var(--text-faint);
             font-size: 0.75rem;
             font-weight: 500;
             flex-shrink: 0;
+        }
+
+        .file-item .file-remove {
+            background: none;
+            border: none;
+            color: var(--text-faint);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+
+        .file-item .file-remove:hover {
+            background: var(--incorrect-dim);
+            color: var(--incorrect);
         }
 
         .file-info {
@@ -886,20 +917,16 @@
             </div>
             <div class="submit-body">
                 <label class="file-input-wrapper" id="file-input-wrapper">
-                    <input type="file" id="submission-file" accept=".mp4" />
+                    <input type="file" id="submission-file" accept=".mp4" multiple />
                     <span class="file-label" id="file-label">
                         <span class="upload-icon">📤</span>
                         <span class="upload-text">
                             <span class="upload-main">Click or drag to upload</span>
-                            <span class="upload-sub">MP4 only, max 50 MB</span>
+                            <span class="upload-sub">MP4 only, max 50 MB, max 10 files</span>
                         </span>
                     </span>
                 </label>
-                <div class="file-chip" id="file-chip" style="display: none;">
-                    <span class="file-icon">🎬</span>
-                    <span class="file-name" id="chip-name"></span>
-                    <span class="file-size" id="chip-size"></span>
-                </div>
+                <div class="file-list" id="file-list"></div>
                 <button id="submit-meme-btn" class="btn btn-primary" disabled>Submit Meme</button>
                 <div class="submit-status" id="submit-status"></div>
             </div>
@@ -1383,17 +1410,20 @@
         const SUPABASE_ANON_KEY = "sb_publishable_YSvGNFDTf7RrmRD3gTeOfw_vITAYU0e";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const MAX_FILE_SIZE = 50 * 1024 * 1024;
+        const MAX_FILES = 10;
 
         const subEls = {
             fileInput: document.getElementById("submission-file"),
             fileLabel: document.getElementById("file-label"),
-            fileInfo: document.getElementById("file-info"),
+            fileList: document.getElementById("file-list"),
             submitBtn: document.getElementById("submit-meme-btn"),
             status: document.getElementById("submit-status"),
             overlay: document.getElementById("submit-overlay"),
             openBtn: document.getElementById("open-submit"),
             closeBtn: document.getElementById("modal-close")
         };
+
+        let selectedFiles = [];
 
         function sanitizeFilename(name) {
             return name
@@ -1403,13 +1433,40 @@
                 .slice(0, 200);
         }
 
+        function updateSubmitButton() {
+            const validCount = selectedFiles.length;
+            subEls.submitBtn.disabled = validCount === 0;
+        }
+
+        function renderFileList() {
+            subEls.fileList.innerHTML = "";
+            selectedFiles.forEach((file, index) => {
+                const item = document.createElement("div");
+                item.className = "file-item";
+                item.innerHTML = `
+                    <span class="file-icon">🎬</span>
+                    <span class="file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
+                    <span class="file-size">${(file.size / 1024 / 1024).toFixed(1)} MB</span>
+                    <button class="file-remove" data-index="${index}" title="Remove">&times;</button>
+                `;
+                subEls.fileList.appendChild(item);
+            });
+
+            const wrapper = document.getElementById("file-input-wrapper");
+            if (selectedFiles.length > 0) {
+                wrapper.classList.add("has-file");
+            } else {
+                wrapper.classList.remove("has-file");
+            }
+
+            updateSubmitButton();
+        }
+
         function openSubmitModal() {
             subEls.overlay.classList.add("visible");
             subEls.fileInput.value = "";
-            const wrapper = document.getElementById("file-input-wrapper");
-            const chip = document.getElementById("file-chip");
-            wrapper.classList.remove("has-file");
-            chip.style.display = "none";
+            selectedFiles = [];
+            renderFileList();
             subEls.status.className = "submit-status";
             subEls.status.textContent = "";
             subEls.submitBtn.disabled = true;
@@ -1426,97 +1483,120 @@
         });
 
         subEls.fileInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            const wrapper = document.getElementById("file-input-wrapper");
-            const chip = document.getElementById("file-chip");
-            const chipName = document.getElementById("chip-name");
-            const chipSize = document.getElementById("chip-size");
+            const files = Array.from(e.target.files || []);
+            const remainingSlots = MAX_FILES - selectedFiles.length;
 
-            if (!file) {
-                wrapper.classList.remove("has-file");
-                chip.style.display = "none";
-                subEls.submitBtn.disabled = true;
-                return;
-            }
+            if (files.length === 0) return;
 
-            const lower = file.name.toLowerCase();
-            const isMp4 = file.type === "video/mp4" && lower.endsWith(".mp4");
-
-            if (!isMp4) {
-                wrapper.classList.remove("has-file");
-                chip.style.display = "none";
+            if (selectedFiles.length + files.length > MAX_FILES) {
                 subEls.status.className = "submit-status error";
-                subEls.status.textContent = "Only .mp4 files are allowed.";
-                subEls.submitBtn.disabled = true;
+                subEls.status.textContent = `Maximum ${MAX_FILES} files allowed. You can add ${remainingSlots} more.`;
                 subEls.fileInput.value = "";
                 return;
             }
 
-            if (file.size > MAX_FILE_SIZE) {
-                wrapper.classList.remove("has-file");
-                chip.style.display = "none";
-                subEls.status.className = "submit-status error";
-                subEls.status.textContent = "File too large. Maximum 50 MB.";
-                subEls.submitBtn.disabled = true;
-                subEls.fileInput.value = "";
-                return;
+            let rejected = false;
+            for (const file of files) {
+                const lower = file.name.toLowerCase();
+                const isMp4 = file.type === "video/mp4" && lower.endsWith(".mp4");
+
+                if (!isMp4) {
+                    subEls.status.className = "submit-status error";
+                    subEls.status.textContent = `Only .mp4 files are allowed. "${file.name}" rejected.`;
+                    rejected = true;
+                    continue;
+                }
+
+                if (file.size > MAX_FILE_SIZE) {
+                    subEls.status.className = "submit-status error";
+                    subEls.status.textContent = `File too large. "${file.name}" exceeds 50 MB.`;
+                    rejected = true;
+                    continue;
+                }
+
+                selectedFiles.push(file);
             }
 
-            wrapper.classList.add("has-file");
-            chip.style.display = "inline-flex";
-            chipName.textContent = file.name;
-            chipSize.textContent = (file.size / 1024 / 1024).toFixed(1) + " MB";
-            subEls.submitBtn.disabled = false;
-            subEls.status.className = "submit-status";
-            subEls.status.textContent = "";
+            if (rejected) {
+                renderFileList();
+            } else {
+                renderFileList();
+                subEls.status.className = "submit-status";
+                subEls.status.textContent = "";
+            }
+
+            subEls.fileInput.value = "";
+        });
+
+        subEls.fileList.addEventListener("click", (e) => {
+            const removeBtn = e.target.closest(".file-remove");
+            if (!removeBtn) return;
+            const index = parseInt(removeBtn.dataset.index, 10);
+            if (index >= 0 && index < selectedFiles.length) {
+                selectedFiles.splice(index, 1);
+                renderFileList();
+            }
         });
 
         subEls.submitBtn.addEventListener("click", async () => {
-            const file = subEls.fileInput.files[0];
-            if (!file) return;
+            if (selectedFiles.length === 0) return;
 
             subEls.submitBtn.disabled = true;
             subEls.status.className = "submit-status";
-            subEls.status.textContent = "Uploading...";
+            subEls.status.textContent = `Uploading 0/${selectedFiles.length}...`;
 
-            const id = crypto.randomUUID();
-            const safeName = sanitizeFilename(file.name);
-            const storagePath = `pending/${id}.mp4`;
+            let successCount = 0;
+            let failCount = 0;
 
-            try {
-                const { error: uploadError } = await supabaseClient.storage
-                    .from("memeless-submissions")
-                    .upload(storagePath, file, {
-                        contentType: "video/mp4",
-                        upsert: false
-                    });
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                const id = crypto.randomUUID();
+                const safeName = sanitizeFilename(file.name);
+                const storagePath = `pending/${id}.mp4`;
 
-                if (uploadError) throw uploadError;
+                subEls.status.textContent = `Uploading ${i + 1}/${selectedFiles.length}: ${file.name}`;
 
-                const { error: dbError } = await supabaseClient
-                    .from("submissions")
-                    .insert({
-                        original_filename: safeName,
-                        storage_path: storagePath,
-                        status: "pending"
-                    });
+                try {
+                    const { error: uploadError } = await supabaseClient.storage
+                        .from("memeless-submissions")
+                        .upload(storagePath, file, {
+                            contentType: "video/mp4",
+                            upsert: false
+                        });
 
-                if (dbError) throw dbError;
+                    if (uploadError) throw uploadError;
 
+                    const { error: dbError } = await supabaseClient
+                        .from("submissions")
+                        .insert({
+                            original_filename: safeName,
+                            storage_path: storagePath,
+                            status: "pending"
+                        });
+
+                    if (dbError) throw dbError;
+
+                    successCount++;
+                } catch (err) {
+                    console.error("Upload failed for", file.name, err);
+                    failCount++;
+                }
+            }
+
+            if (failCount === 0) {
                 subEls.status.className = "submit-status success";
-                subEls.status.textContent = "Meme submitted successfully! It will be reviewed by an admin.";
-                subEls.fileInput.value = "";
-                const wrapper = document.getElementById("file-input-wrapper");
-                const chip = document.getElementById("file-chip");
-                wrapper.classList.remove("has-file");
-                chip.style.display = "none";
-                subEls.submitBtn.disabled = true;
-
+                subEls.status.textContent = `Success! ${successCount} meme(s) submitted for review.`;
+                selectedFiles = [];
+                renderFileList();
                 setTimeout(closeSubmitModal, 1500);
-            } catch (err) {
-                console.error(err);
+            } else if (successCount > 0) {
                 subEls.status.className = "submit-status error";
-                subEls.status.textContent = "Upload failed. Please try again.";
+                subEls.status.textContent = `Partially successful. ${successCount} uploaded, ${failCount} failed. Please retry failed files.`;
+                selectedFiles = [];
+                renderFileList();
+            } else {
+                subEls.status.className = "submit-status error";
+                subEls.status.textContent = "Upload failed for all files. Please try again.";
                 subEls.submitBtn.disabled = false;
             }
         });
